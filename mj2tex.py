@@ -8,8 +8,10 @@ This script was written to export/convert MacJournal entries to (Xe|La)TeX.
 
 import os
 import textwrap
+import sys
+sys.path.append("parser")
 
-import macjournal
+import MJParser
 import LaTeX
 
 def findJournal(Name, Journal):
@@ -18,12 +20,12 @@ def findJournal(Name, Journal):
     down and returns the first journal that matches.
 
     Name: Name of the journal
-    Journal: Object containing journals.  Could be an macjournal.mjdoc instance 
+    Journal: Object containing journals.  Could be an macjournal.mjdoc instance
         or a journal/smart_journal instance.
     """
-    
+
     for journal in Journal.Journals.values():
-        if journal.name == Name: 
+        if journal.name == Name:
             return journal
 
         # Look inside contained Journals
@@ -31,7 +33,7 @@ def findJournal(Name, Journal):
             foundJournal = findJournal(Name, journal)
             if foundJournal:
                 return foundJournal
-            else: 
+            else:
                 continue
 
     # If we get here, then we haven't found anything
@@ -43,7 +45,7 @@ def print_journals(mjDoc, args):
     to the screen
     """
     print("\nJournals in MacJournal library:")
-    macjournal.mjDoc.hierarchy(limit=args.print_journals)
+    MJParser.mjDoc.hierarchy(limit=args.print_journals)
 
 def MakeLaTeX(Journal, texdir):
     """
@@ -64,7 +66,7 @@ def MakeLaTeX(Journal, texdir):
 
     # LaTeX template
     LT = LaTeX.LaTeXTemplate(
-        title='This is the title', 
+        title='This is the title',
         author="Jeremy Lloyd Conlin",
         date="\\today{}"
         )
@@ -76,7 +78,7 @@ def MakeLaTeX(Journal, texdir):
 def ConvertFile(Name, path, outputPath):
     """
     ConvertFile will convert the file from the original format to something that
-    can be "include"-d into LaTeX. 
+    can be "include"-d into LaTeX.
 
     Name: Name of the converted file (without the extension)
     path: Path of the original file (with extension)
@@ -105,11 +107,11 @@ if __name__ == "__main__":
         help=textwrap.dedent(
             """
             Where should the LaTeX file hieararchy be created.  If the directory
-            exists a directory called MacJournal will be created at that 
+            exists a directory called MacJournal will be created at that
             location and everything will be created in the MacJournal directory.
             """)
         )
-    LaTeX_group.add_argument('-l', '--latex', action='store_true', 
+    LaTeX_group.add_argument('-l', '--latex', action='store_true',
         default=False,
         help="Create LaTeX documents in location specified by --latex-dir.")
 
@@ -121,15 +123,15 @@ if __name__ == "__main__":
     print()
 
     # Create the mjdoc class
-    mjDoc = macjournal.mjdoc(args.mjdoc[0], verbose=False)
+    mjDoc = MJParser.mjdoc(args.mjdoc[0], verbose=False)
 
     # Print journals
     if args.print_journals: print_journals(mjDoc, args)
 
     # Pick the right journal
-    if args.journals == 'all': 
+    if args.journals == 'all':
         pickedJournal = mjDoc
-    else: 
+    else:
         pickedJournal = findJournal(args.journals, mjDoc)
     if pickedJournal: pass
 
